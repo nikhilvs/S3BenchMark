@@ -15,6 +15,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public class S3BenchMark {
 
@@ -35,7 +39,7 @@ public class S3BenchMark {
     private static TransferManager tx;
 
     private static final String BUCKET = "dev-h2o-upload-server";
-    private static final String CLIP_PATH = "/home/ec2-user/clip.flv";
+    private static final String CLIP_PATH = "/home/ubuntu/clip.flv";
 //    private static final String CLIP_PATH = "/Users/nikhilvs9999/Documents/poc.java";
     ///Users/nikhilvs9999/Documents/poc.java
 
@@ -57,24 +61,29 @@ public class S3BenchMark {
         tx = new TransferManager(s3, s3TransferManagerThreadPool, true);
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         final Path filePath = Paths.get(CLIP_PATH);
         final File uploadFile = filePath.toFile();
         InputStream in = new FileInputStream(uploadFile);
+        
+            final MultipartFile multipartFile = new MockMultipartFile(uploadFile.getName(),
+        uploadFile.getName(), "video/x-flv", IOUtils.toByteArray(in));
+            
+            
         Callable<Long> c = () -> {
             long t1 = System.currentTimeMillis();
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(uploadFile.length());
 
-            Upload upload = tx.upload(BUCKET, UUID.randomUUID().toString(), in, objectMetadata);
-            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), uploadFile);
+            Upload upload = tx.upload(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
+//            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), uploadFile);
 //            Upload upload = tx.upload(BUCKET, "hello/mello" + System.currentTimeMillis(), uploadFile);
 //            upload.waitForCompletion();
             long t2 = System.currentTimeMillis();
             long time = t2 - t1;
-//            log.info("upload time :" + time + " status :" + upload.isDone());
-            log.info("upload time :" + time + " status :" + result.getETag());
+            log.info("upload time :" + time + " status :" + upload.isDone());
+//            log.info("upload time :" + time + " status :" + result.getETag());
             return time;
         };
 
