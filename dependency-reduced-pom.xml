@@ -30,7 +30,7 @@
               <transformers>
                 <transformer>
                   <manifestEntries>
-                    <Main-Class>S3RequestCheck</Main-Class>
+                    <Main-Class>com.hubbleconnected.monitor.s3monitor.S3BenchMark</Main-Class>
                     <Build-Number>123</Build-Number>
                   </manifestEntries>
                 </transformer>

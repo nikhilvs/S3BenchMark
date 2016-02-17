@@ -17,7 +17,7 @@ public class AWSCredentialProvider
 	{
 		try
 		{
-			credentials = new ProfileCredentialsProvider("simplimonitor").getCredentials();
+			credentials = new ProfileCredentialsProvider("binatone-key").getCredentials();
 			log.info("using ProfileCredentialsProvider");
 		} catch (AmazonClientException e)
 		{

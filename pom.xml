@@ -28,7 +28,7 @@
   <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.10.45</version>
+            <version>1.10.50</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -79,10 +79,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
-
-
         </plugins>
     </build>
   
