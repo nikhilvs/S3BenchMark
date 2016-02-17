@@ -88,7 +88,7 @@ public class S3BenchMark {
                 } catch (InterruptedException | ExecutionException e) {
                     throw new IllegalStateException(e);
                 }
-            });
+            }).forEach(System.out::println);
         } catch (InterruptedException ex) {
             log.error(ex);
         }

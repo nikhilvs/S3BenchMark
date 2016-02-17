@@ -19,7 +19,7 @@ public class AWSCredentialProvider
 		{
 			credentials = new ProfileCredentialsProvider("binatone-key").getCredentials();
 			log.info("using ProfileCredentialsProvider");
-		} catch (AmazonClientException e)
+		} catch (Exception e)
 		{
 			try
 			{
