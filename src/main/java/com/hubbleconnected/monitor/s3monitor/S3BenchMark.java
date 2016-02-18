@@ -57,7 +57,7 @@ public class S3BenchMark {
                 .setNamePrefix("S3_TRANSFER_MANAGER_THREAD_POOL-").build();
         s3TransferManagerThreadPool = Executors.newFixedThreadPool(S3_TRANSFER_MANAGER_THREAD_POOL, threadFactoryForS3);
 
-        AmazonS3 s3 = new AmazonS3Client(AWSCredentialProvider.getAWSCredentials());
+        s3 = new AmazonS3Client(AWSCredentialProvider.getAWSCredentials());
         tx = new TransferManager(s3, s3TransferManagerThreadPool, true);
     }
 
@@ -67,18 +67,18 @@ public class S3BenchMark {
         final File uploadFile = filePath.toFile();
         InputStream in = new FileInputStream(uploadFile);
         
-            final MultipartFile multipartFile = new MockMultipartFile(uploadFile.getName(),
-        uploadFile.getName(), "video/x-flv", IOUtils.toByteArray(in));
+//            final MultipartFile multipartFile = new MockMultipartFile(uploadFile.getName(),
+//        uploadFile.getName(), "video/x-flv", IOUtils.toByteArray(in));
             
             
-        Callable<Long> c = () -> {
+        Callable<Long> process = () -> {
             long t1 = System.currentTimeMillis();
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(uploadFile.length());
 
 //            Upload upload = tx.upload(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
-//            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), uploadFile);
-            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
+            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), uploadFile);
+//            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
 //            Upload upload = tx.upload(BUCKET, "hello/mello" + System.currentTimeMillis(), uploadFile);
 //            upload.waitForCompletion();
             long t2 = System.currentTimeMillis();
@@ -89,18 +89,18 @@ public class S3BenchMark {
         };
 
         List<Future<Long>> futures;
-        List<Callable<Long>> task = new ArrayList<>(S3_CHECK_THREAD_POOL);
+        List<Callable<Long>> tasks = new ArrayList<>(S3_CHECK_THREAD_POOL);
         for (int i = 0; i < S3_CHECK_THREAD_POOL; i++) {
-            task.add(c);
+            tasks.add(process);
         }
         long t1 = System.currentTimeMillis();
         try {
-            futures = s3CheckThreadPool.invokeAll(task);
+            futures = s3CheckThreadPool.invokeAll(tasks);
 
             futures.parallelStream().map(future -> {
                 try {
                     return future.get();
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException  |NullPointerException e) {
                     throw new IllegalStateException(e);
                 }
             });
