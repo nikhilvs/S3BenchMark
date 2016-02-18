@@ -76,14 +76,15 @@ public class S3BenchMark {
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(uploadFile.length());
 
-            Upload upload = tx.upload(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
+//            Upload upload = tx.upload(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
 //            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), uploadFile);
+            PutObjectResult result = s3.putObject(BUCKET, UUID.randomUUID().toString(), multipartFile.getInputStream(), objectMetadata);
 //            Upload upload = tx.upload(BUCKET, "hello/mello" + System.currentTimeMillis(), uploadFile);
 //            upload.waitForCompletion();
             long t2 = System.currentTimeMillis();
             long time = t2 - t1;
-            log.info("upload time :" + time + " status :" + upload.isDone());
-//            log.info("upload time :" + time + " status :" + result.getETag());
+//            log.info("upload time :" + time + " status :" + upload.isDone());
+            log.info("upload time :" + time + " status :" + result.getETag());
             return time;
         };
 
