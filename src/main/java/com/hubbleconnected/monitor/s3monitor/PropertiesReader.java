@@ -57,14 +57,13 @@ public class PropertiesReader
 
 	public static void main(String args[]) throws IOException {
 
-		log.info("Log test : "+PropertiesReader.readValueOf("CREDENTIAL_PROFILE_NAME"));
-		log.info("Log test : "+PropertiesReader.readValueOf("API_SERVER_ELB"));
-		log.info("Log test : "+PropertiesReader.readValueOf("API_SERVER_ASG"));
-		log.info("Log test : "+PropertiesReader.readValueOf("CS_SERVER_ELB"));
-		log.info("Log test : "+PropertiesReader.readValueOf("CS_SERVER_ASG"));
-		log.info("Log test : "+PropertiesReader.readValueOf("RDS_MASTER_NAME"));
-		log.info("Log test : "+PropertiesReader.readValueOf("RDS_SLAVE1_NAME"));
-		log.info("Log test : "+PropertiesReader.readValueOf("RDS_SLAVE2_NAME"));
+		String s="ddaa";
+                if(s==null || s.isEmpty())
+                {
+                    log.info("is null or empty");
+                }
+                else
+                    log.info("not null");
 
 	}
 

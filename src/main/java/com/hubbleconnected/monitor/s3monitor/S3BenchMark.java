@@ -1,5 +1,6 @@
 package com.hubbleconnected.monitor.s3monitor;
 
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,9 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class S3BenchMark {
 
     private static final Logger log = Logger.getLogger(S3BenchMark.class);
-    private static final ExecutorService s3CheckThreadPool;
+    private static ExecutorService s3CheckThreadPool;
     private static final int S3_CHECK_THREAD_POOL = 1000;
-    private static final ExecutorService s3TransferManagerThreadPool;
+    private static ExecutorService s3TransferManagerThreadPool;
     private static final int S3_TRANSFER_MANAGER_THREAD_POOL = 1000;
     private static AmazonS3 s3;
     private static TransferManager tx;
@@ -43,7 +44,7 @@ public class S3BenchMark {
 //    private static final String CLIP_PATH = "/Users/nikhilvs9999/Documents/poc.java";
     ///Users/nikhilvs9999/Documents/poc.java
 
-    static {
+    static void test() {
 //		BasicConfigurator.configure();
         ThreadFactory threadFactory = new HubbleThreadFactory()
                 .setDaemon(false)
@@ -61,9 +62,21 @@ public class S3BenchMark {
         tx = new TransferManager(s3, s3TransferManagerThreadPool, true);
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException {
+    public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
 
-        final Path filePath = Paths.get(CLIP_PATH);
+        InstanceProfileCredentialsProvider in = new  InstanceProfileCredentialsProvider(true);
+        for(;;){
+        log.info("static getAWSAccessKeyId :"+AWSCredentialProvider.getAWSCredentials().getAWSAccessKeyId());
+        log.info("static getAWSSecretKey :"+AWSCredentialProvider.getAWSCredentials().getAWSSecretKey());
+        log.info("o getAWSAccessKeyId :"+in.getCredentials().getAWSAccessKeyId());
+        log.info("o getAWSSecretKey :"+in.getCredentials().getAWSSecretKey());
+        Thread.sleep(1000*60*1);
+        }
+    }
+    
+    void benchS3() throws FileNotFoundException{
+     
+                final Path filePath = Paths.get(CLIP_PATH);
         final File uploadFile = filePath.toFile();
         InputStream in = new FileInputStream(uploadFile);
         
@@ -112,6 +125,7 @@ public class S3BenchMark {
         log.info("Total time taken :" + time + " so req/sec :" + (S3_CHECK_THREAD_POOL * 1000 / time));
         s3CheckThreadPool.shutdown();
 //        tx.shutd;
-
+        
+        
     }
 }

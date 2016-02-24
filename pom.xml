@@ -53,6 +53,12 @@
       <version>4.2.4.RELEASE</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk</artifactId>
+      <version>1.8.11</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
   
   
