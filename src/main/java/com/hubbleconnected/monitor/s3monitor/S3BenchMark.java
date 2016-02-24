@@ -70,6 +70,11 @@ public class S3BenchMark {
         log.info("static getAWSSecretKey :"+AWSCredentialProvider.getAWSCredentials().getAWSSecretKey());
         log.info("o getAWSAccessKeyId :"+in.getCredentials().getAWSAccessKeyId());
         log.info("o getAWSSecretKey :"+in.getCredentials().getAWSSecretKey());
+        if(!in.getCredentials().getAWSSecretKey().contentEquals(AWSCredentialProvider.getAWSCredentials().getAWSSecretKey()))
+        {
+            log.warn("credentials not equal");
+        }
+            
         Thread.sleep(1000*60*1);
         }
     }
