@@ -1,5 +1,6 @@
 package com.hubbleconnected.monitor.s3monitor;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -9,6 +10,8 @@ import java.util.concurrent.ThreadFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.internal.AWSS3V4Signer;
+import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -36,7 +39,7 @@ public class S3BenchMark {
     private static final int S3_CHECK_THREAD_POOL = 1000;
     private static ExecutorService s3TransferManagerThreadPool;
     private static final int S3_TRANSFER_MANAGER_THREAD_POOL = 1000;
-    private static AmazonS3 s3;
+    private static AmazonS3 s3 = new AmazonS3Client(HubbleAWSCredentialProvider.getAWSCredentials());
     private static TransferManager tx;
 
     private static final String BUCKET = "dev-h2o-upload-server";
@@ -58,37 +61,50 @@ public class S3BenchMark {
                 .setNamePrefix("S3_TRANSFER_MANAGER_THREAD_POOL-").build();
         s3TransferManagerThreadPool = Executors.newFixedThreadPool(S3_TRANSFER_MANAGER_THREAD_POOL, threadFactoryForS3);
 
-        s3 = new AmazonS3Client(AWSCredentialProvider.getAWSCredentials());
+        s3 = new AmazonS3Client(HubbleAWSCredentialProvider.getAWSCredentials());
         tx = new TransferManager(s3, s3TransferManagerThreadPool, true);
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
 
-        InstanceProfileCredentialsProvider in = new  InstanceProfileCredentialsProvider(true);
-        for(;;){
-        log.info("static getAWSAccessKeyId :"+AWSCredentialProvider.getAWSCredentials().getAWSAccessKeyId());
-        log.info("static getAWSSecretKey :"+AWSCredentialProvider.getAWSCredentials().getAWSSecretKey());
-        log.info("o getAWSAccessKeyId :"+in.getCredentials().getAWSAccessKeyId());
-        log.info("o getAWSSecretKey :"+in.getCredentials().getAWSSecretKey());
-        if(!in.getCredentials().getAWSSecretKey().contentEquals(AWSCredentialProvider.getAWSCredentials().getAWSSecretKey()))
-        {
-            log.warn("credentials not equal");
-        }
-            
-        Thread.sleep(1000*60*1);
+        InstanceProfileCredentialsProvider in = new InstanceProfileCredentialsProvider(true);
+//        AWSCredentialsProvider
+        AmazonS3 s3Obj = new AmazonS3Client(in);
+        for (;;) {
+            log.info("static getAWSAccessKeyId :" + HubbleAWSCredentialProvider.getAWSCredentials().getAWSAccessKeyId());
+            log.info("static getAWSSecretKey :" + HubbleAWSCredentialProvider.getAWSCredentials().getAWSSecretKey());
+            log.info("o getAWSAccessKeyId :" + in.getCredentials().getAWSAccessKeyId());
+            log.info("o getAWSSecretKey :" + in.getCredentials().getAWSSecretKey());
+            if (!in.getCredentials().getAWSSecretKey().contentEquals(HubbleAWSCredentialProvider.getAWSCredentials().getAWSSecretKey())) {
+                log.warn("credentials not equal");
+
+            }
+
+            List<Bucket> buckets = s3.listBuckets();
+
+            for (Bucket b : buckets) {
+                log.info("static s3 func :" + b.getName());
+                break;
+            }
+
+            buckets = s3Obj.listBuckets();
+            for (Bucket b : buckets) {
+                log.info("obj s3 func :" + b.getName());
+                break;
+            }
+
+            Thread.sleep(1000 * 60 * 1);
         }
     }
-    
-    void benchS3() throws FileNotFoundException{
-     
-                final Path filePath = Paths.get(CLIP_PATH);
+
+    void benchS3() throws FileNotFoundException {
+
+        final Path filePath = Paths.get(CLIP_PATH);
         final File uploadFile = filePath.toFile();
         InputStream in = new FileInputStream(uploadFile);
-        
+
 //            final MultipartFile multipartFile = new MockMultipartFile(uploadFile.getName(),
 //        uploadFile.getName(), "video/x-flv", IOUtils.toByteArray(in));
-            
-            
         Callable<Long> process = () -> {
             long t1 = System.currentTimeMillis();
             ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -118,7 +134,7 @@ public class S3BenchMark {
             futures.parallelStream().map(future -> {
                 try {
                     return future.get();
-                } catch (InterruptedException | ExecutionException  |NullPointerException e) {
+                } catch (InterruptedException | ExecutionException | NullPointerException e) {
                     throw new IllegalStateException(e);
                 }
             });
@@ -130,7 +146,6 @@ public class S3BenchMark {
         log.info("Total time taken :" + time + " so req/sec :" + (S3_CHECK_THREAD_POOL * 1000 / time));
         s3CheckThreadPool.shutdown();
 //        tx.shutd;
-        
-        
+
     }
 }
