@@ -74,9 +74,9 @@ public class S3BenchMark {
         
         log.info("Refreshing credetntials");
 
-        HubbleAWSCredentialProvider.getAWSCredentials().refresh();
-               
-        c = HubbleAWSCredentialProvider.getAWSCredentials().getCredentials();
+        InstanceProfileCredentialsProvider in = new InstanceProfileCredentialsProvider(true);
+        in.refresh();
+        c = in.getCredentials();
         log.info("after refresh  access key : "+c.getAWSAccessKeyId());
         log.info("after refresh  secret key : "+c.getAWSSecretKey());
         
