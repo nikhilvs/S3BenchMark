@@ -1,5 +1,6 @@
 package com.hubbleconnected.monitor.s3monitor;
 
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import java.util.concurrent.Callable;
@@ -67,19 +68,38 @@ public class S3BenchMark {
 
     public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
 
+        AWSCredentials c = HubbleAWSCredentialProvider.getAWSCredentials().getCredentials();
+        log.info("current  access key : "+c.getAWSAccessKeyId());
+        log.info("current  secret key : "+c.getAWSSecretKey());
+        
+        log.info("Refreshing credetntials");
+
+        HubbleAWSCredentialProvider.getAWSCredentials().refresh();
+               
+        c = HubbleAWSCredentialProvider.getAWSCredentials().getCredentials();
+        log.info("after refresh  access key : "+c.getAWSAccessKeyId());
+        log.info("after refresh  secret key : "+c.getAWSSecretKey());
+        
+        
+        
+    }
+
+    
+    void testTokenExpiry() throws InterruptedException{
+        
+        
         InstanceProfileCredentialsProvider in = new InstanceProfileCredentialsProvider(true);
 //        AWSCredentialsProvider
         AmazonS3 s3Obj = new AmazonS3Client(in);
         for (;;) {
-            log.info("static getAWSAccessKeyId :" + HubbleAWSCredentialProvider.getAWSCredentials().getAWSAccessKeyId());
-            log.info("static getAWSSecretKey :" + HubbleAWSCredentialProvider.getAWSCredentials().getAWSSecretKey());
+            log.info("static getAWSAccessKeyId :" + HubbleAWSCredentialProvider.getAWSCredentials().getCredentials().getAWSAccessKeyId());
+            log.info("static getAWSSecretKey :" + HubbleAWSCredentialProvider.getAWSCredentials().getCredentials().getAWSSecretKey());
             log.info("o getAWSAccessKeyId :" + in.getCredentials().getAWSAccessKeyId());
             log.info("o getAWSSecretKey :" + in.getCredentials().getAWSSecretKey());
-            if (!in.getCredentials().getAWSSecretKey().contentEquals(HubbleAWSCredentialProvider.getAWSCredentials().getAWSSecretKey())) {
+            if (!in.getCredentials().getAWSSecretKey().contentEquals(HubbleAWSCredentialProvider.getAWSCredentials().getCredentials().getAWSSecretKey())) {
                 log.warn("credentials not equal");
 
             }
-
             List<Bucket> buckets = s3.listBuckets();
 
             for (Bucket b : buckets) {
@@ -96,7 +116,6 @@ public class S3BenchMark {
             Thread.sleep(1000 * 60 * 1);
         }
     }
-
     void benchS3() throws FileNotFoundException {
 
         final Path filePath = Paths.get(CLIP_PATH);
