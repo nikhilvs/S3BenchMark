@@ -16,7 +16,7 @@ public class HubbleAWSCredentialProvider implements AWSCredentialsProvider {
     static {
         try {
             credentials = new ProfileCredentialsProvider("binatone-key");
-
+            credentials.getCredentials();
             log.info("using ProfileCredentialsProvider");
         } catch (Exception e) {
             try {
